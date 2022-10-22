@@ -1,3 +1,5 @@
+const User = require('../models/user'); //users model
+
 module.exports.users = function (req, res) {
     return res.render('users', {
         title: 'User'
@@ -19,7 +21,25 @@ module.exports.signIn = function (req, res) {
 
 //Get a sign-up data
 module.exports.create = function (req, res) {
-    //Todo later
+    if (req.body.password != req.body.confirm_password) {
+        return res.redirect('back');
+    }
+
+    User.findOne({ email: req.body.email }, function (err, user) {
+        if (err) { return console.log(`Error in finding user during signing-up`); }
+
+        if (!user) {
+            User.create(req.body, function (err, user) {
+                if (err) { return console.log(`Error while creating new-user`); }
+
+                console.log(`Created a new-user : ${user}`);
+                res.redirect('/users/sign-in');
+            });
+        }
+        else {
+            return res.redirect('back');
+        }
+    });
 }
 
 //Sign-in and create session for user
