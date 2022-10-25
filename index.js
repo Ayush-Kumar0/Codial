@@ -4,6 +4,10 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const db = require('./config/mongoose');
 const port = 8000;
+const session = require('express-session');
+const passport = require('passport');
+const passportLocal = require('./config/passport-local-strategy');
+const mongoStore = require('connect-mongo');
 
 //Static files
 app.use(express.static('./assets'));
@@ -21,6 +25,28 @@ app.set('layout extractScripts', true);
 app.use(express.urlencoded());
 //Cookies
 app.use(cookieParser());
+
+//Middleware that encrypts the cookie
+app.use(session({
+    name: 'codial',
+    secret: 'sectretkey',
+    saveUninitialized: false,
+    resave: false,
+    cookie: {
+        maxAge: (1000 * 60 * 100)
+    },
+    store: new mongoStore({
+        // mongooseConnection: db,
+        client: require('mongoose').connection.getClient(),
+        autoRemove: 'disabled'
+    }, function (err) { console.log(err || `Error connecting mongo-store`); })
+}));
+
+//Using passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(passport.setAuthenticatedUser);
 
 //Use express.Router middleware
 app.use('/', require('./routes'));

@@ -7,12 +7,22 @@ module.exports.users = function (req, res) {
 }
 
 module.exports.signUp = function (req, res) {
+
+    if (req.isAuthenticated()) {
+        return res.redirect('/');
+    }
+
     return res.render('user_sign_up', {
         title: 'User | Sign Up'
     });
 }
 
 module.exports.signIn = function (req, res) {
+
+    if (req.isAuthenticated()) {
+        return res.redirect('/');
+    }
+
     return res.render('user_sign_in', {
         title: 'User | Sign In'
     });
@@ -44,5 +54,14 @@ module.exports.create = function (req, res) {
 
 //Sign-in and create session for user
 module.exports.createSession = function (req, res) {
-    //Todo later
+    return res.redirect('/');
+}
+
+
+//Deleting the cookie
+module.exports.destroySession = function (req, res) {
+    req.logout(function (err) {
+        if (err) { return console.log(`Error while logging out`); }
+        res.redirect('/');
+    });
 }
